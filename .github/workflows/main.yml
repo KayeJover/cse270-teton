@@ -1,7 +1,7 @@
 # Simple workflow for deploying static content to GitHub Pages
 name: Simple CI/CD Pipeline for CSE 270
 
-on: 
+on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
@@ -110,55 +110,22 @@ jobs:
         category: "/language:${{matrix.language}}"
     # Single deploy job since we're just deploying
 
- deploy:
-  needs: analyze
-  environment:
-    name: github-pages
-    url: ${{ steps.deployment.outputs.page_url }}
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4.1.2
-
-    - name: Setup Pages
-      uses: actions/configure-pages@v4.0.0
-
-    - name: Show repo root (debug)
-      run: |
-        echo "PWD: $(pwd)"
-        ls -la
-
-    # Find a valid artifact directory among a list of common places.
-    # If found, set it as the output "path" for later steps.
-    - name: Find artifact directory
-      id: find_artifact
-      run: |
-        set -euo pipefail
-        CANDIDATES="teton/1.6 public dist build _site"
-        echo "Looking for one of: $CANDIDATES"
-        for p in $CANDIDATES; do
-          if [ -d "$p" ] && [ "$(ls -A "$p")" ]; then
-            echo "Found artifact directory: $p"
-            # write to GITHUB_OUTPUT so other steps can use it
-            echo "path=$p" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-        done
-        echo "ERROR: No artifact directory found. Expected one of: $CANDIDATES" >&2
-        echo "Make sure your build step creates a directory with the static site (e.g. public, dist, build, teton/1.6, or _site)." >&2
-        exit 1
-
-    - name: Show chosen artifact (debug)
-      run: |
-        echo "Selected path: '${{ steps.find_artifact.outputs.path }}'"
-        ls -la "${{ steps.find_artifact.outputs.path }}"
-
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3.0.1
-      with:
-        path: ${{ steps.find_artifact.outputs.path }}
-
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4.0.5
-
+  deploy:
+    needs: analyze
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.2
+      - name: Setup Pages
+        uses: actions/configure-pages@v4.0.0
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3.0.1
+        with:
+          # Upload only teton/1.6
+          path: 'teton/1.6'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4.0.5
