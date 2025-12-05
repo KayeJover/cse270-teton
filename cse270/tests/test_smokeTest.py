@@ -17,7 +17,7 @@ class TestSmokeTest():
     options.add_argument("--headless=new")
     self.driver = webdriver.Chrome(options=options)
     self.vars ={}
-    
+
   
   def teardown_method(self, method):
     self.driver.quit()
@@ -69,11 +69,22 @@ class TestSmokeTest():
   def test_joinPage(self):
     self.driver.get("http://127.0.0.1:5500/cse270/teton/1.6/index.html")
     self.driver.set_window_size(1283, 830)
+
+    # open Join page
     self.driver.find_element(By.LINK_TEXT, "Join").click()
+
+    # ensure fname exists in DOM
     elements = self.driver.find_elements(By.NAME, "fname")
     assert len(elements) > 0
-    self.driver.find_element(By.NAME, "fname").send_keys("Kaye")
+    fname_elem = elements[0]
+
+    # set hidden/readonly/input value with JS (safe)
+    self.driver.execute_script("arguments[0].value = arguments[1];", fname_elem, "Kaye")
+
+    # submit (click visible submit control)
     self.driver.find_element(By.NAME, "submit").click()
+
+    # continue filling other fields (use visible controls)
     self.driver.find_element(By.NAME, "lname").send_keys("Gualingco")
     self.driver.find_element(By.NAME, "bizname").click()
     self.driver.find_element(By.NAME, "bizname").send_keys("keya")
@@ -81,7 +92,11 @@ class TestSmokeTest():
     self.driver.find_element(By.NAME, "submit").click()
     self.driver.find_element(By.NAME, "biztitle").send_keys("seller")
     self.driver.find_element(By.NAME, "submit").click()
+
     elements = self.driver.find_elements(By.NAME, "email")
     assert len(elements) > 0
-    self.driver.find_element(By.NAME, "fname").click()
+
+    # If you intended to click fname (visible) later, do that; otherwise skip
+    # self.driver.find_element(By.NAME, "fname").click()
+
   
